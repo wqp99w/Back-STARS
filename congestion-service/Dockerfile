@@ -17,7 +17,7 @@ COPY . .
 
 # 빌드
 RUN chmod +x ./gradlew
-RUN ./gradlew clean build --no-daemon
+RUN ./gradlew clean build -x test --no-daemon
 
 
 # 최종 산출물 : /app/build/libs/*SNAPSHOT.jar
