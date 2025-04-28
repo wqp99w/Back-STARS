@@ -16,7 +16,7 @@ public class WeatherEsService {
 
     // 특정 지역 날씨
     public Map<String, Object> getWeatherFromES(String area) {
-        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_weather_20250424/_search";
+        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_weather_20250428/_search";
 
         Map<String, Object> term = Map.of("weather.area_nm", area);
         Map<String, Object> query = Map.of("term", term);
@@ -39,7 +39,7 @@ public class WeatherEsService {
 
     // 전체 지역 날씨
     public List<Map<String, Object>> getAllWeatherFromES() {
-        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_weather_20250424/_search";
+        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_weather_20250428/_search";
 
         Map<String, Object> body = Map.of(
                 "size", 0,

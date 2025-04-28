@@ -17,7 +17,7 @@ public class ParkEsService {
 
     // 특정 지역 주차장 정보
     public Map<String, Object> getParkFromES(String areaId) {
-        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_parking_20250424/_search";
+        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_parking_20250428/_search";
         log.info("Requesting park info for areaId: {}", areaId);
 
         Map<String, Object> term = Map.of("parking.area_nm", areaId);
@@ -52,7 +52,7 @@ public class ParkEsService {
 
     // 전체 지역 주차장 정보
     public List<Map<String, Object>> getAllParkFromES() {
-        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_parking_20250424/_search";
+        String url = "http://elasticsearch.seoultravel.life/seoul_citydata_parking_20250428/_search";
         log.info("Requesting all park info");
 
         Map<String, Object> body = Map.of(
