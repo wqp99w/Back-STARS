@@ -51,35 +51,32 @@ jobs:
       - name: place-service 빌드
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: place-service
         run: |
           cd place-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG  
+          docker build -t $ECR_REGISTRY/place-service:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/place-service:$IMAGE_TAG  
 
       - name: congestion-service 빌드
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: congestion-service
         run: |
           cd congestion-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG    
+          docker build -t $ECR_REGISTRY/congestion-service:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/congestion-service:$IMAGE_TAG    
 
       - name: external-info-service 빌드
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: external-info-service
         run: |
           cd external-info-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG    
+          docker build -t $ECR_REGISTRY/external-info-service:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/external-info-service:$IMAGE_TAG    
       
 
       - name: kubeconfig 설정
