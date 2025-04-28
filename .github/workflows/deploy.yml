@@ -86,11 +86,11 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          kubectl set image deployment/external-info-service external-info-service=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          kubectl set image deployment/external-info-service external-info-service=$ECR_REGISTRY/external-info-service:$IMAGE_TAG
           kubectl rollout status deployment/external-info-service
           
-          kubectl set image deployment/place-service place-service=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          kubectl set image deployment/place-service place-service=$ECR_REGISTRY/place-service:$IMAGE_TAG
           kubectl rollout status deployment/place-service
           
-          kubectl set image deployment/congestion-service congestion-service=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          kubectl set image deployment/congestion-service congestion-service=$ECR_REGISTRY/congestion-service:$IMAGE_TAG
           kubectl rollout status deployment/congestion-service
