@@ -99,6 +99,7 @@ jobs:
           docker push $ECR_REGISTRY/place-service:$IMAGE_TAG   
           docker push $ECR_REGISTRY/place-service:latest
           
+          echo "태그 확인: place-service=$ECR_REGISTRY/place-service:$IMAGE_TAG"
           
           kubectl set image deployment/place-service place-service=$ECR_REGISTRY/place-service:$IMAGE_TAG
           kubectl rollout status deployment/place-service
@@ -189,6 +190,8 @@ jobs:
 
           docker push $ECR_REGISTRY/gateway:$IMAGE_TAG    
           docker push $ECR_REGISTRY/gateway:latest
+          
+          echo "태그 확인: gateway=$ECR_REGISTRY/gateway:$IMAGE_TAG"
           
           kubectl set image deployment/gateway gateway=$ECR_REGISTRY/gateway:$IMAGE_TAG
           kubectl rollout status deployment/gateway
