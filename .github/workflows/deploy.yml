@@ -23,7 +23,7 @@ jobs:
   upload-image:
     runs-on: ubuntu-latest
     env :
-      IMAGE_TAG: ${{ github.run_number }}
+      IMAGE_TAG: 1.${{ github.run_number }}
     steps:
 #      - name: Set IMAGE_TAG based on input
 #        id: tag
@@ -114,14 +114,14 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          kubectl set image deployment/external-info-service external-info-service=$ECR_REGISTRY/external-info-service:latest
+          kubectl set image deployment/external-info-service external-info-service=$ECR_REGISTRY/external-info-service:$IMAGE_TAG
           kubectl rollout status deployment/external-info-service
           
-          kubectl set image deployment/place-service place-service=$ECR_REGISTRY/place-service:latest
+          kubectl set image deployment/place-service place-service=$ECR_REGISTRY/place-service:$IMAGE_TAG
           kubectl rollout status deployment/place-service
           
-          kubectl set image deployment/congestion-service congestion-service=$ECR_REGISTRY/congestion-service:latest
+          kubectl set image deployment/congestion-service congestion-service=$ECR_REGISTRY/congestion-service:$IMAGE_TAG
           kubectl rollout status deployment/congestion-service
           
-          kubectl set image deployment/gateway gateway=$ECR_REGISTRY/gateway:latest
+          kubectl set image deployment/gateway gateway=$ECR_REGISTRY/gateway:$IMAGE_TAG
           kubectl rollout status deployment/gateway
