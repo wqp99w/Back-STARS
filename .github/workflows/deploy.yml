@@ -57,6 +57,7 @@ jobs:
       - name: Build & Push external-info-service
         run: |
           cd external-info-service
+          echo "ECR_REGISTRY is: [$ECR_REGISTRY]"
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar -x test
           docker build -t $ECR_REGISTRY/external-info-service:$IMAGE_TAG .
