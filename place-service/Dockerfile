@@ -59,9 +59,5 @@ COPY .env .env
 
 EXPOSE 8080
 
-<<<<<<< HEAD
 # 서버가동
 CMD ["java", "-jar", "place.jar"]
-=======
-COPY .env .env
->>>>>>> 1ead646371b8146e7f27b109c6514b7ec9529d1a
