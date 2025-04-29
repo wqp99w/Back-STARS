@@ -44,7 +44,7 @@ jobs:
       - name: kubeconfig 설정
         run: |
           aws eks update-kubeconfig --region   ap-northeast-2 --name one-cluster
-          run: echo "Step output: ${{ steps.set-ecr.outputs.registry }}"
+          echo "Step output: ${{ steps.set-ecr.outputs.registry }}"
         
 
   external-info-service-build :
