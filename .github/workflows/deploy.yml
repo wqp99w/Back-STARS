@@ -54,6 +54,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: gateway 빌드
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          cd gateway
+          echo "${{ secrets.BACKEND_ENV}}" > .env
+          gradle bootJar -x test
+          docker build -t $ECR_REGISTRY/gateway:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/gateway:$IMAGE_TAG $ECR_REGISTRY/gateway:latest
+
+          docker push $ECR_REGISTRY/gateway:$IMAGE_TAG    
+          docker push $ECR_REGISTRY/gateway:latest
+
       - name: place-service 빌드
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
