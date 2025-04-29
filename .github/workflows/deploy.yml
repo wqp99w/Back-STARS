@@ -1,17 +1,5 @@
 name: Backend Upload ECR
 
-#on:
-#  workflow_dispatch:
-#    inputs:
-#      environment:
-#        description: '수동 배포'
-#        required: true
-#        default: 'all'
-#        type: choice
-#        options:
-#          - all
-#          - latest
-
 on:
   push:
     branches: [develop]
@@ -20,20 +8,11 @@ on:
 
 
 jobs:
-  upload-image:
+  setup:
     runs-on: ubuntu-latest
     env :
       IMAGE_TAG: 1.${{ github.run_number }}
     steps:
-#      - name: Set IMAGE_TAG based on input
-#        id: tag
-#        run: |
-#          if [ "${{ github.event.inputs.environment }}" = "all" ]; then
-#            echo "IMAGE_TAG=1.0.${{ github.run_number }}" >> $GITHUB_ENV
-#          else
-#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-#          fi
-
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -54,22 +33,44 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: gateway 빌드
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      - name: kubeconfig 설정
+        run: aws eks update-kubeconfig --region   ap-northeast-2 --name one-cluster
+
+  external-info-service-build :
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
+      IMAGE_TAG: 1.${{ github.run_number }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build & Push external-info-service
         run: |
-          cd gateway
+          cd external-info-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar -x test
-          docker build -t $ECR_REGISTRY/gateway:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/gateway:$IMAGE_TAG $ECR_REGISTRY/gateway:latest
+          docker build -t $ECR_REGISTRY/external-info-service:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/external-info-service:$IMAGE_TAG $ECR_REGISTRY/external-info-service:latest
+          
+          docker push $ECR_REGISTRY/external-info-service:$IMAGE_TAG    
+          docker push $ECR_REGISTRY/external-info-service:latest 
+          
+          kubectl set image deployment/external-info-service external-info-service=$ECR_REGISTRY/external-info-service:$IMAGE_TAG
+          kubectl rollout status deployment/external-info-service
 
-          docker push $ECR_REGISTRY/gateway:$IMAGE_TAG    
-          docker push $ECR_REGISTRY/gateway:latest
+  place-service-build:
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
+      IMAGE_TAG: 1.${{ github.run_number }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: place-service 빌드
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      - name: Build & Push place-service
         run: |
           cd place-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
@@ -79,10 +80,22 @@ jobs:
           
           docker push $ECR_REGISTRY/place-service:$IMAGE_TAG   
           docker push $ECR_REGISTRY/place-service:latest
+          
+          
+          kubectl set image deployment/place-service place-service=$ECR_REGISTRY/place-service:$IMAGE_TAG
+          kubectl rollout status deployment/place-service
 
-      - name: congestion-service 빌드
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  congestion-service-build:
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
+      IMAGE_TAG: 1.${{ github.run_number }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build & Push congestion-service
         run: |
           cd congestion-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
@@ -92,36 +105,30 @@ jobs:
           
           docker push $ECR_REGISTRY/congestion-service:$IMAGE_TAG    
           docker push $ECR_REGISTRY/congestion-service:latest
-
-      - name: external-info-service 빌드
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          cd external-info-service
-          echo "${{ secrets.BACKEND_ENV}}" > .env
-          gradle bootJar -x test
-          docker build -t $ECR_REGISTRY/external-info-service:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/external-info-service:$IMAGE_TAG $ECR_REGISTRY/external-info-service:latest
-          
-          docker push $ECR_REGISTRY/external-info-service:$IMAGE_TAG    
-          docker push $ECR_REGISTRY/external-info-service:latest  
-      
-
-      - name: kubeconfig 설정
-        run: aws eks update-kubeconfig --region   ap-northeast-2 --name one-cluster
-
-      - name: Deploy to EKS
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          kubectl set image deployment/external-info-service external-info-service=$ECR_REGISTRY/external-info-service:$IMAGE_TAG
-          kubectl rollout status deployment/external-info-service
-          
-          kubectl set image deployment/place-service place-service=$ECR_REGISTRY/place-service:$IMAGE_TAG
-          kubectl rollout status deployment/place-service
           
           kubectl set image deployment/congestion-service congestion-service=$ECR_REGISTRY/congestion-service:$IMAGE_TAG
           kubectl rollout status deployment/congestion-service
+
+  gateway-build:
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
+      IMAGE_TAG: 1.${{ github.run_number }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build & Push gateway
+        run: |
+          cd gateway
+          echo "${{ secrets.BACKEND_ENV}}" > .env
+          gradle bootJar -x test
+          docker build -t $ECR_REGISTRY/gateway:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/gateway:$IMAGE_TAG $ECR_REGISTRY/gateway:latest
+
+          docker push $ECR_REGISTRY/gateway:$IMAGE_TAG    
+          docker push $ECR_REGISTRY/gateway:latest
           
           kubectl set image deployment/gateway gateway=$ECR_REGISTRY/gateway:$IMAGE_TAG
           kubectl rollout status deployment/gateway
