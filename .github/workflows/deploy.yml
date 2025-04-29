@@ -1,16 +1,22 @@
 name: Backend Upload ECR
 
+#on:
+#  workflow_dispatch:
+#    inputs:
+#      environment:
+#        description: '수동 배포'
+#        required: true
+#        default: 'all'
+#        type: choice
+#        options:
+#          - all
+#          - latest
+
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: '수동 배포'
-        required: true
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - latest
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 
 jobs:
@@ -19,14 +25,14 @@ jobs:
     env :
       IMAGE_TAG: ${{ github.run_number }}
     steps:
-      - name: Set IMAGE_TAG based on input
-        id: tag
-        run: |
-          if [ "${{ github.event.inputs.environment }}" = "all" ]; then
-            echo "IMAGE_TAG=1.0.${{ github.run_number }}" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-          fi
+#      - name: Set IMAGE_TAG based on input
+#        id: tag
+#        run: |
+#          if [ "${{ github.event.inputs.environment }}" = "all" ]; then
+#            echo "IMAGE_TAG=1.0.${{ github.run_number }}" >> $GITHUB_ENV
+#          else
+#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+#          fi
 
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -56,7 +62,10 @@ jobs:
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar -x test
           docker build -t $ECR_REGISTRY/place-service:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/place-service:$IMAGE_TAG  
+           docker tag $ECR_REGISTRY/place-service:$IMAGE_TAG $ECR_REGISTRY/place-service:latest
+          
+          docker push $ECR_REGISTRY/place-service:$IMAGE_TAG   
+          docker push $ECR_REGISTRY/place-service:latest
 
       - name: congestion-service 빌드
         env:
@@ -66,7 +75,10 @@ jobs:
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar -x test
           docker build -t $ECR_REGISTRY/congestion-service:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/congestion-service:$IMAGE_TAG $ECR_REGISTRY/congestion-service:latest
+          
           docker push $ECR_REGISTRY/congestion-service:$IMAGE_TAG    
+          docker push $ECR_REGISTRY/congestion-service:latest
 
       - name: external-info-service 빌드
         env:
@@ -76,7 +88,10 @@ jobs:
           echo "${{ secrets.BACKEND_ENV}}" > .env
           gradle bootJar -x test
           docker build -t $ECR_REGISTRY/external-info-service:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/external-info-service:$IMAGE_TAG $ECR_REGISTRY/external-info-service:latest
+          
           docker push $ECR_REGISTRY/external-info-service:$IMAGE_TAG    
+          docker push $ECR_REGISTRY/external-info-service:latest  
       
 
       - name: kubeconfig 설정
