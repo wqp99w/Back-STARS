@@ -32,6 +32,7 @@ jobs:
         run: |
           echo "ECR_REGISTRY is: [$ECR_REGISTRY]"
           echo "registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
+          echo "${{ steps.set-ecr.outputs.registry }}"
         env: # 이거 먼저 돌고 run 돔
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
 
