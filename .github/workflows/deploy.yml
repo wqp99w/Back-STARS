@@ -8,10 +8,11 @@ on:
 
 
 jobs:
-  setup:
+
+  external-info-service-build :
     runs-on: ubuntu-latest
-    outputs:
-      ecr-registry: ${{ steps.set-ecr.outputs.registry }}
+    env:
+      IMAGE_TAG: 1.${{ github.run_number }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -27,14 +28,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: ecr 로그인 정보 변수로 등록
-        id: set-ecr
-        run: |
-          echo "ECR_REGISTRY is: [$ECR_REGISTRY]"
-          echo "registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
-        env: # 이거 먼저 돌고 run 돔
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-
       - name: 자바 설치
         uses: actions/setup-java@v2
         with:
@@ -45,19 +38,10 @@ jobs:
         run: |
           aws eks update-kubeconfig --region   ap-northeast-2 --name one-cluster
           echo "Step output: ${{ steps.set-ecr.outputs.registry }}"
-        
-
-  external-info-service-build :
-    needs: setup
-    runs-on: ubuntu-latest
-    env:
-      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
-      IMAGE_TAG: 1.${{ github.run_number }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
 
       - name: Build & Push external-info-service
+        env: # ecr 업로드 할 때 필요한 변수들 선언
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} # ecr 경로
         run: |
           cd external-info-service
           echo "ECR_REGISTRY is: [$ECR_REGISTRY]"
@@ -73,16 +57,38 @@ jobs:
           kubectl rollout status deployment/external-info-service
 
   place-service-build:
-    needs: setup
     runs-on: ubuntu-latest
     env:
-      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
       IMAGE_TAG: 1.${{ github.run_number }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: 자바 설치
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: kubeconfig 설정
+        run: |
+          aws eks update-kubeconfig --region   ap-northeast-2 --name one-cluster
+          echo "Step output: ${{ steps.set-ecr.outputs.registry }}"
+
       - name: Build & Push place-service
+        env: # ecr 업로드 할 때 필요한 변수들 선언
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} # ecr 경로
         run: |
           cd place-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
@@ -98,16 +104,37 @@ jobs:
           kubectl rollout status deployment/place-service
 
   congestion-service-build:
-    needs: setup
     runs-on: ubuntu-latest
     env:
-      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
       IMAGE_TAG: 1.${{ github.run_number }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: 자바 설치
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: kubeconfig 설정
+        run: |
+          aws eks update-kubeconfig --region   ap-northeast-2 --name one-cluster
+          echo "Step output: ${{ steps.set-ecr.outputs.registry }}"
       - name: Build & Push congestion-service
+        env: # ecr 업로드 할 때 필요한 변수들 선언
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} # ecr 경로
         run: |
           cd congestion-service
           echo "${{ secrets.BACKEND_ENV}}" > .env
@@ -122,16 +149,37 @@ jobs:
           kubectl rollout status deployment/congestion-service
 
   gateway-build:
-    needs: setup
     runs-on: ubuntu-latest
     env:
-      ECR_REGISTRY: ${{ needs.setup.outputs.ecr-registry }}
       IMAGE_TAG: 1.${{ github.run_number }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: 자바 설치
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: kubeconfig 설정
+        run: |
+          aws eks update-kubeconfig --region   ap-northeast-2 --name one-cluster
+          echo "Step output: ${{ steps.set-ecr.outputs.registry }}"
       - name: Build & Push gateway
+        env: # ecr 업로드 할 때 필요한 변수들 선언
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} # ecr 경로
         run: |
           cd gateway
           echo "${{ secrets.BACKEND_ENV}}" > .env
