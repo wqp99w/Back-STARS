@@ -32,11 +32,8 @@ out/
 /nbproject/private/
 /nbbuild/
 /dist/
-/nbdist
+/nbdist/
 /.nb-gradle/
 
 ### VS Code ###
 .vscode/
-
-
-.Dockerfile
