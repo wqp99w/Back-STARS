@@ -27,10 +27,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: ecr 로그인 정보 변수로 등ㄺ
+      - name: ecr 로그인 정보 변수로 등록
         id: set-ecr
-        run: echo "registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
-        env:
+        run: |
+          echo "ECR_REGISTRY is: [$ECR_REGISTRY]"
+          echo "registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
+        env: # 이거 먼저 돌고 run 돔
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
 
       - name: 자바 설치
