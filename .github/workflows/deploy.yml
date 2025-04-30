@@ -230,7 +230,7 @@ jobs:
         env: # ecr 업로드 할 때 필요한 변수들 선언
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} # ecr 경로
         run: |
-          cd gateway
+          cd user-service
           echo "${{ secrets.BACKEND_USER_ENV}}" > .env
           gradle bootJar -x test
           docker build -t $ECR_REGISTRY/user-service:$IMAGE_TAG .
