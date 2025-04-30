@@ -235,7 +235,9 @@ jobs:
           gradle bootJar -x test
           docker build -t $ECR_REGISTRY/user-service:$IMAGE_TAG .
           docker tag $ECR_REGISTRY/user-service:$IMAGE_TAG $ECR_REGISTRY/user-service:latest
-
+          
+          ls -lh build/libs
+          
           docker push $ECR_REGISTRY/user-service:$IMAGE_TAG    
           docker push $ECR_REGISTRY/user-service:latest
 
