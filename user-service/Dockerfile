@@ -17,7 +17,7 @@ COPY . .
 
 # 빌드
 RUN chmod +x ./gradlew
-RUN ./gradlew clean build --no-daemon
+RUN ./gradlew clean build -x test --no-daemon
 
 
 # 최종 산출물 : /app/build/libs/*SNAPSHOT.jar
@@ -33,11 +33,11 @@ WORKDIR /app
 # 스테이지1으로부터 특정위치에 존재하는 산출물을 현재 컨테이너의 작업디렉토리 루트에 복사 
 
 COPY --from=builder /app/build/libs/*SNAPSHOT.jar ./user.jar
-ENV JWT_SECRET_KEY=c9f2b6a1e89d47fca5f1b2e8d9ac15c7b0e4a2d6f57c4b1e9f32d8e2b7a5c9f1
 # 포트지정
 
+COPY .env .env
 
-EXPOSE 8080
+EXPOSE 8083
 
 # 서버가동
 CMD ["java", "-jar", "user.jar"]
