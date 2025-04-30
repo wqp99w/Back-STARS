@@ -234,7 +234,7 @@ jobs:
           echo "${{ secrets.BACKEND_USER_ENV}}" > .env
           gradle bootJar -x test
           docker build -t $ECR_REGISTRY/user-service:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/gateway:$IMAGE_TAG $ECR_REGISTRY/user-service:latest
+          docker tag $ECR_REGISTRY/user-service:$IMAGE_TAG $ECR_REGISTRY/user-service:latest
 
           docker push $ECR_REGISTRY/user-service:$IMAGE_TAG    
           docker push $ECR_REGISTRY/user-service:latest
